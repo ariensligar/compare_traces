@@ -1,0 +1,14 @@
+example_projects/*.aedtresults/
+example_projects/*.aedb/
+example_projects/*.aedt/
+example_projects/temp/
+*.aedtresults/
+example_projects/*.lock
+example_projects/*.auto
+STK_Scripts/log
+__pycache__/
+/**/__pycache__/
+**/__pycache__/
+meshes/
+output/
+/streamlit_old/
