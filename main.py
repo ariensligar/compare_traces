@@ -1,24 +1,24 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QWidget, QVBoxLayout, QPushButton, QFileDialog
-from PySide6.QtCore import QFile
+from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog
+# from PySide6.QtCore import QFile
 from gui_main import Ui_MainWindow
 from trace_select import Ui_Dialog
 from Lib.Populate_GUI import GUI_Values
 import numpy as np
-import pyaedt
+# import pyaedt
 from pyaedt import Hfss
 from pyaedt import Desktop
 import csv
 
-import matplotlib
-from scipy import interpolate
+# import matplotlib
+# from scipy import interpolate
 # matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
-import random
+
 
 version = '2022.2'
 
@@ -253,14 +253,17 @@ class MainWindow(QMainWindow):
         dataset_names = list(self.data_dict.keys())
         if num_datasets > 0:
             np.array(num_datasets)
-            header = []
+            header = ['X Axis']
             data = []
             first_col = self.data_dict[dataset_names[0]][0]
             data.append(first_col)
+
             for each in self.data_dict:
                 data.append(self.data_dict[each][1])
+                header.append(each)
             data = np.array(data)
-            np.savetxt(fname, data, delimiter=',', header='')
+
+            np.savetxt(fname, data.T, delimiter=',', header=",".join(header))
         else:
             print("No data exists, not saving csv file")
 
@@ -391,7 +394,8 @@ class MainWindow(QMainWindow):
     def plot(self):
 
         secondary_axis = self.ui.secondary_axis_checkbox.isChecked()
-
+        if secondary_axis:
+            has_been_created=False
         # instead of ax.hold(False)
         self.figure.clear()
         # create an axis
@@ -401,22 +405,23 @@ class MainWindow(QMainWindow):
         # plot data
 
         for each in self.data_dict:
-            if each != "output":
+            if "output" not in each:
                 data = self.data_dict[each]
                 ax.plot(data[0], data[1], label=each)
-
+            elif "output" in each:
+                data = self.data_dict[each]
+                if secondary_axis:
+                    if not has_been_created:
+                        ax2 = ax.twinx()
+                    ax2.plot(data[0], data[1], label=each, color=np.random.rand(3))
+                    ax2.set_ylabel('Output Data', color='k')
+                    ax2.legend(loc='lower right')
+                    has_been_created=True
+                else:
+                    ax.plot(data[0], data[1], label=each)
+                    ax.set_ylabel('Input/Output Data')
+                    ax.legend()
         ax.legend(loc='upper left')
-        if 'output' in self.data_dict.keys():
-            data = self.data_dict['output']
-            if secondary_axis:
-                ax2 = ax.twinx()
-                ax2.plot(data[0], data[1], label='Output')
-                ax2.set_ylabel('Output Data', color='b')
-                ax2.legend(loc='lower right')
-            else:
-                ax.plot(data[0], data[1], label='Output')
-                ax.set_ylabel('Input/Output Data')
-                ax.legend()
         plt.tight_layout()
         # refresh canvas
         self.canvas.draw()
@@ -428,6 +433,7 @@ class MainWindow(QMainWindow):
         #     self.interpolate_data()
 
         calc_str = self.ui.calc_text.toPlainText()
+
         calc_str = calc_str.replace("A", "self.data_dict[\"A\"][1,:]")
         calc_str = calc_str.replace("B", "self.data_dict[\"B\"][1,:]")
         calc_str = calc_str.replace("C", "self.data_dict[\"C\"][1,:]")
@@ -443,8 +449,13 @@ class MainWindow(QMainWindow):
         calc_str = calc_str.replace("M", "self.data_dict[\"M\"][1,:]")
         calc_str = calc_str.replace("N", "self.data_dict[\"N\"][1,:]")
 
-        output = eval(calc_str)
-        self.data_dict['output'] = np.array([self.data_dict["A"][0], output])
+        calc_str = calc_str.replace("X", "self.data_dict[\"A\"][0,:]")
+
+        calc_str = calc_str.split("\n")
+        for output_idx, calc in enumerate(calc_str):
+            output = eval(calc)
+            output_name = f'output_{output_idx}'
+            self.data_dict[output_name] = np.array([self.data_dict["A"][0], output])
         self.plot()
 
 
