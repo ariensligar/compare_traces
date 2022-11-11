@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'trace_select.ui'
+## Form generated from reading UI file 'gui_trace_select.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.0
 ##

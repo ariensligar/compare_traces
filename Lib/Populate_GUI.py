@@ -7,7 +7,6 @@ Created on Thu Sep 16 11:48:53 2021
 
 import numpy as np
 
-
 class GUI_Values():
     def __init__(self, aedtapp):
         self.aedtapp = aedtapp
@@ -36,15 +35,15 @@ class GUI_Values():
             report = results.GetChildObject(report_name)
             report_props = results.GetPropNames()
             report_type = report.GetPropValue('Display Type')
+            # print(report_type)
             if report_type == 'Rectangular Plot':
                 valid_reports.append(report.GetPropValue('Name'))
-
         if len(valid_reports) == 0:
             valid_reports = ['No Valid Reports']
         return valid_reports
 
     def get_trace_names(self, report_name):
-        trace_list=['No Valid Traces']
+        trace_list = ['No Valid Traces']
         if report_name != 'No Valid Reports':
             results = self.aedtapp.odesign.GetChildObject('Results')
 
@@ -56,7 +55,7 @@ class GUI_Values():
             for pt in possible_traces:
                 pt_temp = trace_obj.GetChildObject(pt)
                 props = pt_temp.GetPropNames()
-                if 'Solution' in pt_temp.GetPropNames(): #solution seems to a property that is always in a trace
+                if 'X Component' in pt_temp.GetPropNames(): #this string seems to a property that is always in a trace
                     trace_list.append(pt)
                     #index_of_last_trace = trace_list.index("Legend")
                     #trace_list = trace_list[:index_of_last_trace]

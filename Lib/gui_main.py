@@ -11,20 +11,32 @@
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
+    QCursor, QFont, QFontDatabase, QGradient,
+    QIcon, QImage, QKeySequence, QLinearGradient,
+    QPainter, QPalette, QPixmap, QRadialGradient,
+    QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
     QHBoxLayout, QLabel, QLineEdit, QMainWindow,
-    QMenuBar, QPushButton, QScrollArea, QSizePolicy,
-    QTextEdit, QToolButton, QVBoxLayout, QWidget)
+    QMenu, QMenuBar, QPushButton, QScrollArea,
+    QSizePolicy, QStatusBar, QTextEdit, QToolButton,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(959, 489)
+        MainWindow.resize(959, 501)
+        self.action2022_1 = QAction(MainWindow)
+        self.action2022_1.setObjectName(u"action2022_1")
+        self.action2022_1.setCheckable(True)
+        self.action2022_2 = QAction(MainWindow)
+        self.action2022_2.setObjectName(u"action2022_2")
+        self.action2022_2.setCheckable(True)
+        self.action2022_2.setChecked(True)
+        self.action2023_1 = QAction(MainWindow)
+        self.action2023_1.setObjectName(u"action2023_1")
+        self.action2023_1.setCheckable(True)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.scrollArea = QScrollArea(self.centralwidget)
@@ -317,7 +329,20 @@ class Ui_MainWindow(object):
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
         self.menubar.setGeometry(QRect(0, 0, 959, 22))
+        self.menuFile = QMenu(self.menubar)
+        self.menuFile.setObjectName(u"menuFile")
+        self.menuSelect_AEDT_Instance = QMenu(self.menuFile)
+        self.menuSelect_AEDT_Instance.setObjectName(u"menuSelect_AEDT_Instance")
         MainWindow.setMenuBar(self.menubar)
+        self.statusBar = QStatusBar(MainWindow)
+        self.statusBar.setObjectName(u"statusBar")
+        MainWindow.setStatusBar(self.statusBar)
+
+        self.menubar.addAction(self.menuFile.menuAction())
+        self.menuFile.addAction(self.menuSelect_AEDT_Instance.menuAction())
+        self.menuSelect_AEDT_Instance.addAction(self.action2022_1)
+        self.menuSelect_AEDT_Instance.addAction(self.action2022_2)
+        self.menuSelect_AEDT_Instance.addAction(self.action2023_1)
 
         self.retranslateUi(MainWindow)
 
@@ -326,8 +351,17 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        self.action2022_1.setText(QCoreApplication.translate("MainWindow", u"2022.1", None))
+        self.action2022_2.setText(QCoreApplication.translate("MainWindow", u"2022.2", None))
+        self.action2023_1.setText(QCoreApplication.translate("MainWindow", u"2023.1", None))
         self.trace_text_G.setText(QCoreApplication.translate("MainWindow", u"Browse to Select Trace...", None))
-        self.trace_text_A.setText(QCoreApplication.translate("MainWindow", u"Browse to Select Trace...", None))
+#if QT_CONFIG(tooltip)
+        self.trace_text_A.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Trace A is always required. All calculations are based off of this traces X axis. If you do not have a uniform X axis between all traces, an attempt will be made to interpolate/extroplate based on Trace A. The units of traces do not have to be the same, all operations will be done indepenent of units. Always populate trace A before any other trace.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
+        self.trace_text_A.setText(QCoreApplication.translate("MainWindow", u"Browse to Select Trace... (Required)", None))
+#if QT_CONFIG(tooltip)
+        self.trace_browse_A.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Browse existing projects/designs for a report and trace that you want to include in the calculation.</p></body></html>", None))
+#endif // QT_CONFIG(tooltip)
         self.trace_browse_A.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.trace_browse_J.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.trace_browse_B.setText(QCoreApplication.translate("MainWindow", u"...", None))
@@ -377,9 +411,11 @@ class Ui_MainWindow(object):
         self.export_to_csv_button.setText(QCoreApplication.translate("MainWindow", u"Save CSV", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"Calculation", None))
 #if QT_CONFIG(tooltip)
-        self.calc_text.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Enter an expression using the Python syntax. The input supports numpy operations. Multiple expressions can be entered as new lines within this window. For example, enter an expression on the top line, if you press enter and go down to the second line, a second expression can be entered. </p><p><span style=\" font-weight:700;\">Examples:</span></p><p><span style=\" font-style:italic;\">Using standard python math library: A+B, A*B, A/B+C, sqrt(A)</span></p><p>Using numpy library: </p><p><span style=\" font-style:italic;\">np.power(A,2), np.sqrt(np.power(A,2)+np.power(B,2)), np.abs(A)-B/A, np.fft.fft(A), np.linalg.norm(A)</span></p><p><span style=\" font-style:italic;\">Create a complex number:</span></p><p><span style=\" font-style:italic;\">A+B*1j</span></p></body></html>", None))
+        self.calc_text.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Enter an expression using the Python syntax. The input supports numpy operations. Multiple expressions can be entered as new lines within this window. For example, enter an expression on the top line, if you press enter and go down to the second line, a second expression can be entered. X is a reserved keyword that will use the X axis values of trace A.</p><p><span style=\" font-weight:700;\">Examples:</span></p><p><span style=\" font-style:italic;\">Using standard python math library: A+B, A*B, A/B+C, sqrt(A)</span></p><p>Using numpy library: </p><p><span style=\" font-style:italic;\">np.power(A,2), np.sqrt(np.power(A,2)+np.power(B,2)), np.abs(A)-B/A, np.fft.fft(A), np.linalg.norm(A)</span></p><p><span style=\" font-style:italic;\">Create a complex number:</span></p><p><span style=\" font-style:italic;\">A+B*1j</span></p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
         self.calc_button.setText(QCoreApplication.translate("MainWindow", u"Calculate", None))
         self.secondary_axis_checkbox.setText(QCoreApplication.translate("MainWindow", u"Output on Second Y Axis", None))
+        self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
+        self.menuSelect_AEDT_Instance.setTitle(QCoreApplication.translate("MainWindow", u"Select AEDT Instance", None))
     # retranslateUi
 
