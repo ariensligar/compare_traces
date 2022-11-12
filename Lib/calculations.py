@@ -29,6 +29,13 @@ class MainWindow(QMainWindow):
         self.ui.action2022_2.changed.connect(lambda: self.version_check_changed('2022.2'))
         self.ui.action2023_1.changed.connect(lambda: self.version_check_changed('2023.1'))
 
+        self.ui.actionOutput_on_Second_Y_Axis.changed.connect(lambda: self.set_plot_options(0))
+        self.ui.actionOnly_Show_Output.changed.connect(lambda: self.set_plot_options(1))
+        self.ui.actionOnly_Show_Input.changed.connect(lambda: self.set_plot_options(2))
+
+        self.ui.action_expression1.triggered.connect(lambda: self.set_expression(0))
+
+        self.plot_options = {'secondary_axis': False, 'only_output': False, 'only_input': False}
         self.version = '2022.2'  # default state
         self.ui.statusBar.showMessage(f'Using AEDT version: {self.version}')
         # self.ui.version_check_changed.clicked.connect(self.show_more)
@@ -160,6 +167,39 @@ class MainWindow(QMainWindow):
         self.ui.add_more_button.clicked.connect(self.show_more)
         self.ui.send_to_aedt_button.clicked.connect(self.create_aedt_report)
         self.ui.export_to_csv_button.clicked.connect(self.export_csv)
+
+    def set_expression(self, expression_num):
+
+        if expression_num == 0:
+            self.ui.action_expression1.blockSignals(True)
+            self.ui.calc_text.clear()
+            self.ui.calc_text.setPlainText('10.0*np.log10(np.abs((np.fft.ifft(A+B*1j))))')
+            self.ui.action_expression1.blockSignals(False)
+
+    def set_plot_options(self, option_num):
+        self.ui.actionOutput_on_Second_Y_Axis.blockSignals(True)
+        self.ui.actionOnly_Show_Output.blockSignals(True)
+        self.ui.actionOnly_Show_Input.blockSignals(True)
+
+        if option_num == 0:
+            self.plot_options = {'secondary_axis': True, 'only_output': False, 'only_input': False}
+            self.ui.actionOutput_on_Second_Y_Axis.setChecked(self.plot_options['secondary_axis'])
+            self.ui.actionOnly_Show_Output.setChecked(self.plot_options['only_output'])
+            self.ui.actionOnly_Show_Input.setChecked(self.plot_options['only_input'])
+        elif option_num == 1:
+            self.plot_options = {'secondary_axis': False, 'only_output': True, 'only_input': False}
+            self.ui.actionOutput_on_Second_Y_Axis.setChecked(self.plot_options['secondary_axis'])
+            self.ui.actionOnly_Show_Output.setChecked(self.plot_options['only_output'])
+            self.ui.actionOnly_Show_Input.setChecked(self.plot_options['only_input'])
+        elif option_num == 2:
+            self.plot_options = {'secondary_axis': False, 'only_output': False, 'only_input': True}
+            self.ui.actionOutput_on_Second_Y_Axis.setChecked(self.plot_options['secondary_axis'])
+            self.ui.actionOnly_Show_Output.setChecked(self.plot_options['only_output'])
+            self.ui.actionOnly_Show_Input.setChecked(self.plot_options['only_input'])
+
+        self.ui.actionOutput_on_Second_Y_Axis.blockSignals(False)
+        self.ui.actionOnly_Show_Output.blockSignals(False)
+        self.ui.actionOnly_Show_Input.blockSignals(False)
 
     def version_check_changed(self, version):
 
@@ -418,7 +458,14 @@ class MainWindow(QMainWindow):
 
     def plot(self):
 
-        secondary_axis = self.ui.secondary_axis_checkbox.isChecked()
+        self.ui.actionOutput_on_Second_Y_Axis.changed.connect(lambda: self.set_plot_options(0))
+        self.ui.actionOnly_Show_Output.changed.connect(lambda: self.set_plot_options(1))
+        self.ui.actionOnly_Show_Input.changed.connect(lambda: self.set_plot_options(2))
+
+        secondary_axis = self.ui.actionOutput_on_Second_Y_Axis.isChecked()
+        only_output = self.ui.actionOnly_Show_Output.isChecked()
+        only_input = self.ui.actionOnly_Show_Input.isChecked()
+
         if secondary_axis:
             has_been_created = False
         # instead of ax.hold(False)
@@ -430,10 +477,10 @@ class MainWindow(QMainWindow):
         # plot data
 
         for each in self.data_dict:
-            if "output" not in each:
+            if "output" not in each and not only_output:
                 data = self.data_dict[each]
                 ax.plot(data[0], data[1], label=each)
-            elif "output" in each:
+            elif "output" in each and not only_input:
                 data = self.data_dict[each]
                 if secondary_axis:
                     if not has_been_created:
@@ -477,8 +524,12 @@ class MainWindow(QMainWindow):
         calc_str = calc_str.replace("X", "self.data_dict[\"A\"][0,:]")
 
         calc_str = calc_str.split("\n")
+        calc_str = [i for i in calc_str if i]
         for output_idx, calc in enumerate(calc_str):
-            output = eval(calc)
-            output_name = f'output_{output_idx}'
-            self.data_dict[output_name] = np.array([self.data_dict["A"][0], output])
+            try:
+                output = eval(calc)
+                output_name = f'output_{output_idx}'
+                self.data_dict[output_name] = np.array([self.data_dict["A"][0], output])
+            except:
+                print(f'{calc} is invalid expression')
         self.plot()
