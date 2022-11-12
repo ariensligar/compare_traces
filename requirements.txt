@@ -4,7 +4,7 @@ altgraph==0.17.3
 appdirs==1.4.4
 async-timeout==4.0.2
 attrs==22.1.0
-certifi @ file:///C:/b/abs_ac29jvt43w/croot/certifi_1665076682579/work/certifi
+#certifi @ file:///C:/b/abs_ac29jvt43w/croot/certifi_1665076682579/work/certifi
 cffi==1.15.1
 charset-normalizer==2.1.1
 clr-loader==0.2.4
