@@ -51,4 +51,4 @@ def copy_and_overwrite(from_path, to_path):
 
 
 
-shutil.copy('template.rpt','{0}/Lib/template.rpt'.format(DISTPATH))
+shutil.copy('template.rpt','{0}/template.rpt'.format(DISTPATH))

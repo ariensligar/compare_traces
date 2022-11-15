@@ -266,7 +266,7 @@ class MainWindow(QMainWindow):
 
         if export_success:
             report_names_before = oModule.GetChildNames()
-            oModule.CreateReportFromTemplate(f"{self.base_path}/template.rpt")
+            oModule.CreateReportFromTemplate("template.rpt")
             report_names_after = oModule.GetChildNames()
             resulting_report_name = self.diff(report_names_before, report_names_after)[0]
             oModule.ImportIntoReport(resulting_report_name, export_name)
