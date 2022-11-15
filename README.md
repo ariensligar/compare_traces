@@ -29,7 +29,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/ariensligar/compare_traces">
-    <img src="images/logo.png" alt="Logo" width="585" height="169">
+    <img src="images/logo_white_bg.png" alt="Logo" width="585" height="169">
   </a>
 
 <h3 align="center">Ansys Compare Traces Wizard</h3>
