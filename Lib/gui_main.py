@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(959, 501)
+        MainWindow.resize(963, 508)
         self.action2022_1 = QAction(MainWindow)
         self.action2022_1.setObjectName(u"action2022_1")
         self.action2022_1.setCheckable(True)
@@ -48,6 +48,8 @@ class Ui_MainWindow(object):
         self.actionOnly_Show_Input.setCheckable(True)
         self.action_expression1 = QAction(MainWindow)
         self.action_expression1.setObjectName(u"action_expression1")
+        self.action_expression2 = QAction(MainWindow)
+        self.action_expression2.setObjectName(u"action_expression2")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.scrollArea = QScrollArea(self.centralwidget)
@@ -334,7 +336,7 @@ class Ui_MainWindow(object):
         self.verticalLayoutWidget.raise_()
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 959, 22))
+        self.menubar.setGeometry(QRect(0, 0, 963, 22))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuSelect_AEDT_Instance = QMenu(self.menuFile)
@@ -360,6 +362,7 @@ class Ui_MainWindow(object):
         self.menuOptions.addAction(self.actionOnly_Show_Input)
         self.menuOptions.addSeparator()
         self.menuExpression_Library.addAction(self.action_expression1)
+        self.menuExpression_Library.addAction(self.action_expression2)
 
         self.retranslateUi(MainWindow)
 
@@ -375,6 +378,7 @@ class Ui_MainWindow(object):
         self.actionOnly_Show_Output.setText(QCoreApplication.translate("MainWindow", u"Only Show Output", None))
         self.actionOnly_Show_Input.setText(QCoreApplication.translate("MainWindow", u"Only Show Input", None))
         self.action_expression1.setText(QCoreApplication.translate("MainWindow", u"10.0*np.log10(np.abs((np.fft.ifft(A+B*1j)))", None))
+        self.action_expression2.setText(QCoreApplication.translate("MainWindow", u"A+B*1j", None))
         self.trace_text_G.setText(QCoreApplication.translate("MainWindow", u"Browse to Select Trace...", None))
 #if QT_CONFIG(tooltip)
         self.trace_text_A.setToolTip(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Trace A is always required. All calculations are based off of this traces X axis. If you do not have a uniform X axis between all traces, an attempt will be made to interpolate/extroplate based on Trace A. The units of traces do not have to be the same, all operations will be done indepenent of units. Always populate trace A before any other trace.</p></body></html>", None))

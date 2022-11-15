@@ -62,6 +62,18 @@ class Dialog(QDialog, Ui_Dialog):
         with open(export_name, 'r') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             header = next(reader, None)
+            all_lines = csvfile.readlines()
+
+        # data = []
+        # for line in all_lines:
+        #     line = line.replace("\n","").replace(" ","")
+        #     line_split = line.split(",")
+        #     temp_data = []
+        #     for each in line_split:
+        #         temp_data.append(float(each))
+        #     data.append(temp_data)
+        # data = np.array(data)
+
 
         data = np.loadtxt(export_name, comments='#', skiprows=1, delimiter=',')
 
@@ -81,8 +93,26 @@ class Dialog(QDialog, Ui_Dialog):
             if trace_name == column:
                 column_idx = n + 1
                 break
-        data_out = np.array([data[:, 0] * scale, data[:, column_idx]])
-        return data_out
+        # check if data is 2D. IF it is 2D, we want to rearrange data based on first two columns and return
+        # data in the format [m][n][data]
+        # if data is id we only return [m][data]
+        data_is_2d = False
+        if len(set(list(data[:, 0]))) != len(list(data[:, 0])): #first column will loop, second column will increase with each loop
+            data_is_2d = True
+            x_data = np.array(list(set(data[:, 0])))
+            y_data = np.array(list(set(data[:, 1])))
+            data_out_x = x_data*scale
+            data_out_y = y_data
+            data_out_z = np.array(data[:, column_idx])
+            data_out_z = data_out_z.reshape((len(data_out_y),len(data_out_x)))
+            test = 1
+            return {'x':data_out_x,'y':data_out_y,'z':data_out_z}
+        else: # data is 1d
+            #data_out = np.array([data[:, 0] * scale, data[:, column_idx]])
+            data_out_x = np.array(data[:, 0] * scale)
+            data_out_y = np.array(data[:, column_idx])
+            data_out_z = None
+            return {'x':data_out_x, 'y':data_out_y,'z': data_out_z}
 
     def activate_project(self, project_name, design_name=None):
         if design_name is not None:

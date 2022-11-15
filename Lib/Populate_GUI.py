@@ -36,7 +36,7 @@ class GUI_Values():
             report_props = results.GetPropNames()
             report_type = report.GetPropValue('Display Type')
             # print(report_type)
-            if report_type == 'Rectangular Plot':
+            if report_type == 'Rectangular Plot' or report_type == 'Rectangular Contour Plot' or report_type == 'Data Table':
                 valid_reports.append(report.GetPropValue('Name'))
         if len(valid_reports) == 0:
             valid_reports = ['No Valid Reports']

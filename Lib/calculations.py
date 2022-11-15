@@ -1,9 +1,5 @@
 from PySide6.QtWidgets import QMainWindow, QFileDialog
-
-# import pathlib
-# root_dir = pathlib.Path(__file__).absolute().parent.parent.parent
-# base_path = str(root_dir.resolve())
-# sys.path.append(base_path + '/script_lib')
+import pathlib
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,9 +17,29 @@ from Lib.gui_main import Ui_MainWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, pids):
+        root_dir = pathlib.Path(__file__).absolute().parent
+        self.base_path = str(root_dir.resolve())
+        # sys.path.append(base_path + '/script_lib')
+
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.input_label = [self.ui.label_A, self.ui.label_B, self.ui.label_B, self.ui.label_D,
+                            self.ui.label_E, self.ui.label_F, self.ui.label_G, self.ui.label_H,
+                            self.ui.label_I, self.ui.label_J, self.ui.label_K, self.ui.label_L,
+                            self.ui.label_M, self.ui.label_N]
+        self.input_browse = [self.ui.trace_browse_A, self.ui.trace_browse_B, self.ui.trace_browse_B,
+                             self.ui.trace_browse_D,
+                             self.ui.trace_browse_E, self.ui.trace_browse_F, self.ui.trace_browse_G,
+                             self.ui.trace_browse_H,
+                             self.ui.trace_browse_I, self.ui.trace_browse_J, self.ui.trace_browse_K,
+                             self.ui.trace_browse_L,
+                             self.ui.trace_browse_M, self.ui.trace_browse_N]
+        self.input_text = [self.ui.trace_text_A, self.ui.trace_text_B, self.ui.trace_text_B, self.ui.trace_text_D,
+                           self.ui.trace_text_E, self.ui.trace_text_F, self.ui.trace_text_G, self.ui.trace_text_H,
+                           self.ui.trace_text_I, self.ui.trace_text_J, self.ui.trace_text_K, self.ui.trace_text_L,
+                           self.ui.trace_text_M, self.ui.trace_text_N]
 
         self.ui.action2022_1.changed.connect(lambda: self.version_check_changed('2022.1'))
         self.ui.action2022_2.changed.connect(lambda: self.version_check_changed('2022.2'))
@@ -34,6 +50,7 @@ class MainWindow(QMainWindow):
         self.ui.actionOnly_Show_Input.changed.connect(lambda: self.set_plot_options(2))
 
         self.ui.action_expression1.triggered.connect(lambda: self.set_expression(0))
+        self.ui.action_expression2.triggered.connect(lambda: self.set_expression(1))
 
         self.plot_options = {'secondary_axis': False, 'only_output': False, 'only_input': False}
         self.version = '2022.2'  # default state
@@ -67,6 +84,7 @@ class MainWindow(QMainWindow):
         self.aedtapp = aedtapp
         self.initGUI()
         self.data_dict = {}
+        self.data_is_2D = False
 
         self.previous_proj_selection = None
         self.previous_design_selection = None
@@ -115,53 +133,11 @@ class MainWindow(QMainWindow):
         self.ui.trace_browse_M.clicked.connect(lambda: self.open_trace_selection_ui('M_calc', 'M'))
         self.ui.trace_browse_N.clicked.connect(lambda: self.open_trace_selection_ui('N_calc', 'N'))
 
-        self.ui.label_C.hide()
-        self.ui.trace_text_C.hide()
-        self.ui.trace_browse_C.hide()
-
-        self.ui.label_D.hide()
-        self.ui.trace_text_D.hide()
-        self.ui.trace_browse_D.hide()
-
-        self.ui.label_E.hide()
-        self.ui.trace_text_E.hide()
-        self.ui.trace_browse_E.hide()
-
-        self.ui.label_F.hide()
-        self.ui.trace_text_F.hide()
-        self.ui.trace_browse_F.hide()
-
-        self.ui.label_G.hide()
-        self.ui.trace_text_G.hide()
-        self.ui.trace_browse_G.hide()
-
-        self.ui.label_H.hide()
-        self.ui.trace_text_H.hide()
-        self.ui.trace_browse_H.hide()
-
-        self.ui.label_I.hide()
-        self.ui.trace_text_I.hide()
-        self.ui.trace_browse_I.hide()
-
-        self.ui.label_J.hide()
-        self.ui.trace_text_J.hide()
-        self.ui.trace_browse_J.hide()
-
-        self.ui.label_K.hide()
-        self.ui.trace_text_K.hide()
-        self.ui.trace_browse_K.hide()
-
-        self.ui.label_L.hide()
-        self.ui.trace_text_L.hide()
-        self.ui.trace_browse_L.hide()
-
-        self.ui.label_M.hide()
-        self.ui.trace_text_M.hide()
-        self.ui.trace_browse_M.hide()
-
-        self.ui.label_N.hide()
-        self.ui.trace_text_N.hide()
-        self.ui.trace_browse_N.hide()
+        for idx, viz in enumerate(self.input_text):
+            if idx > 2:  # show the first 3
+                self.input_label[idx].hide()
+                self.input_browse[idx].hide()
+                self.input_text[idx].hide()
 
         self.ui.calc_button.clicked.connect(self.calculate)
         self.ui.add_more_button.clicked.connect(self.show_more)
@@ -175,6 +151,11 @@ class MainWindow(QMainWindow):
             self.ui.calc_text.clear()
             self.ui.calc_text.setPlainText('10.0*np.log10(np.abs((np.fft.ifft(A+B*1j))))')
             self.ui.action_expression1.blockSignals(False)
+        elif expression_num == 1:
+            self.ui.action_expression2.blockSignals(True)
+            self.ui.calc_text.clear()
+            self.ui.calc_text.setPlainText('(A+B*1j)')
+            self.ui.action_expression2.blockSignals(False)
 
     def set_plot_options(self, option_num):
         self.ui.actionOutput_on_Second_Y_Axis.blockSignals(True)
@@ -285,7 +266,7 @@ class MainWindow(QMainWindow):
 
         if export_success:
             report_names_before = oModule.GetChildNames()
-            oModule.CreateReportFromTemplate("template.rpt")
+            oModule.CreateReportFromTemplate(f"{self.base_path}/template.rpt")
             report_names_after = oModule.GetChildNames()
             resulting_report_name = self.diff(report_names_before, report_names_after)[0]
             oModule.ImportIntoReport(resulting_report_name, export_name)
@@ -309,11 +290,11 @@ class MainWindow(QMainWindow):
             np.array(num_datasets)
             header = ['X Axis']
             data = []
-            first_col = self.data_dict[dataset_names[0]][0]
+            first_col = self.data_dict[dataset_names[0]]['x']
             data.append(first_col)
 
             for each in self.data_dict:
-                data.append(self.data_dict[each][1])
+                data.append(self.data_dict[each]['y'])
                 header.append(each)
             data = np.array(data)
 
@@ -331,55 +312,11 @@ class MainWindow(QMainWindow):
 
         self.num_times_show_more_clicked += 1
 
-        if self.num_times_show_more_clicked == 1:
-            self.ui.label_C.show()
-            self.ui.trace_text_C.show()
-            self.ui.trace_browse_C.show()
-
-        elif self.num_times_show_more_clicked == 2:
-            self.ui.label_D.show()
-            self.ui.trace_text_D.show()
-            self.ui.trace_browse_D.show()
-        elif self.num_times_show_more_clicked == 3:
-            self.ui.label_E.show()
-            self.ui.trace_text_E.show()
-            self.ui.trace_browse_E.show()
-        elif self.num_times_show_more_clicked == 4:
-            self.ui.label_F.show()
-            self.ui.trace_text_F.show()
-            self.ui.trace_browse_F.show()
-        elif self.num_times_show_more_clicked == 5:
-            self.ui.label_G.show()
-            self.ui.trace_text_G.show()
-            self.ui.trace_browse_G.show()
-        elif self.num_times_show_more_clicked == 6:
-            self.ui.label_H.show()
-            self.ui.trace_text_H.show()
-            self.ui.trace_browse_H.show()
-        elif self.num_times_show_more_clicked == 7:
-            self.ui.label_I.show()
-            self.ui.trace_text_I.show()
-            self.ui.trace_browse_I.show()
-        elif self.num_times_show_more_clicked == 8:
-            self.ui.label_J.show()
-            self.ui.trace_text_J.show()
-            self.ui.trace_browse_J.show()
-        elif self.num_times_show_more_clicked == 9:
-            self.ui.label_K.show()
-            self.ui.trace_text_K.show()
-            self.ui.trace_browse_K.show()
-        elif self.num_times_show_more_clicked == 10:
-            self.ui.label_L.show()
-            self.ui.trace_text_L.show()
-            self.ui.trace_browse_L.show()
-        elif self.num_times_show_more_clicked == 11:
-            self.ui.label_M.show()
-            self.ui.trace_text_M.show()
-            self.ui.trace_browse_M.show()
-        elif self.num_times_show_more_clicked == 12:
-            self.ui.label_N.show()
-            self.ui.trace_text_N.show()
-            self.ui.trace_browse_N.show()
+        if self.num_times_show_more_clicked < 12:
+            idx = self.num_times_show_more_clicked + 2
+            self.input_label[idx].show()
+            self.input_browse[idx].show()
+            self.input_text[idx].show()
 
     def open_trace_selection_ui(self, s, button_id):
         updateDialog = Dialog(self.aedtapp)
@@ -391,6 +328,9 @@ class MainWindow(QMainWindow):
             if trace_name == "No Valid Traces" or trace_name == "Select Trace...":
                 return 0
             data = updateDialog.get_trace_data()
+            if data['z'] is not None:
+                self.data_is_2D = True
+
             self.previous_proj_selection = updateDialog.project_name_input.currentText()
             self.previous_design_selection = updateDialog.design_name_input.currentText()
             self.previous_report_selection = updateDialog.report_name_input.currentText()
@@ -399,58 +339,27 @@ class MainWindow(QMainWindow):
                 self.activate_project(self.previous_proj_selection, self.previous_design_selection)
 
             text_to_display = f'{trace_name} : ({self.previous_proj_selection} {self.previous_design_selection})'
-            if button_id == 'A':
-                self.ui.trace_text_A.clear()
-                self.ui.trace_text_A.insert(text_to_display)
-            elif button_id == 'B':
-                self.ui.trace_text_B.clear()
-                self.ui.trace_text_B.insert(text_to_display)
-            elif button_id == 'C':
-                self.ui.trace_text_C.clear()
-                self.ui.trace_text_C.insert(text_to_display)
-            elif button_id == 'D':
-                self.ui.trace_text_D.clear()
-                self.ui.trace_text_D.insert(text_to_display)
-            elif button_id == 'E':
-                self.ui.trace_text_E.clear()
-                self.ui.trace_text_E.insert(text_to_display)
-            elif button_id == 'F':
-                self.ui.trace_text_F.clear()
-                self.ui.trace_text_F.insert(text_to_display)
-            elif button_id == 'G':
-                self.ui.trace_text_G.clear()
-                self.ui.trace_text_G.insert(text_to_display)
-            elif button_id == 'H':
-                self.ui.trace_text_H.clear()
-                self.ui.trace_text_H.insert(text_to_display)
-            elif button_id == 'J':
-                self.ui.trace_text_J.clear()
-                self.ui.trace_text_J.insert(text_to_display)
-            elif button_id == 'K':
-                self.ui.trace_text_K.clear()
-                self.ui.trace_text_K.insert(text_to_display)
-            elif button_id == 'L':
-                self.ui.trace_text_L.clear()
-                self.ui.trace_text_L.insert(text_to_display)
-            elif button_id == 'M':
-                self.ui.trace_text_M.clear()
-                self.ui.trace_text_M.insert(text_to_display)
-            elif button_id == 'N':
-                self.ui.trace_text_N.clear()
-                self.ui.trace_text_N.insert(text_to_display)
+
+            button_id_map = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7, 'I': 8, 'J': 9, 'K': 10,
+                             'L': 11, 'M': 12, 'N': 13}
+            if button_id in button_id_map.keys():
+                button_id_to_idx = button_id_map[button_id]
+
+                self.input_text[button_id_to_idx].clear()
+                self.input_text[button_id_to_idx].insert(text_to_display)
+
             self.data_dict[button_id] = data
             self.plot()
 
-    # def check_data_xaxis(self):
-    #     length_list = []
-    #     for each in self.data_dict:
-    #         if each != "output":
-    #             data = self.data_dict[each]
-    #
-    #             length_list.append(len(data[0]))
-    #     if len(set(length_list))>1:
-    #         return # data sets are not the same number of samples
-    #     return
+    def check_data_xaxis(self):
+        length_list = []
+        for each in self.data_dict:
+            if each != "output":
+                data = self.data_dict[each]
+                length_list.append(len(data[0]))
+        if len(set(length_list))>1:
+            return # data sets are not the same number of samples
+        return
     # def interpolate_data(self):
     #     x = np.arange(0, 10)
     #     y = np.exp(-x / 3.0)
@@ -479,20 +388,27 @@ class MainWindow(QMainWindow):
         for each in self.data_dict:
             if "output" not in each and not only_output:
                 data = self.data_dict[each]
-                ax.plot(data[0], data[1], label=each)
+                if data['z'] is None:
+                    ax.plot(data['x'], data['y'], label=each)
+                else:
+                    pass
+                    # ax.imshow(data['z'])
             elif "output" in each and not only_input:
                 data = self.data_dict[each]
-                if secondary_axis:
-                    if not has_been_created:
-                        ax2 = ax.twinx()
-                    ax2.plot(data[0], data[1], label=each, color=np.random.rand(3))
-                    ax2.set_ylabel('Output Data', color='k')
-                    ax2.legend(loc='lower right')
-                    has_been_created = True
+                if data['z'] is None:
+                    if secondary_axis:
+                        if not has_been_created:
+                            ax2 = ax.twinx()
+                        ax2.plot(data['x'], data['y'], label=each, color=np.random.rand(3))
+                        ax2.set_ylabel('Output Data', color='k')
+                        ax2.legend(loc='lower right')
+                        has_been_created = True
+                    else:
+                        ax.plot(data['x'], data['y'], label=each)
+                        ax.set_ylabel('Input/Output Data')
+                        ax.legend()
                 else:
-                    ax.plot(data[0], data[1], label=each)
-                    ax.set_ylabel('Input/Output Data')
-                    ax.legend()
+                    ax.imshow(data['z'])
         ax.legend(loc='upper left')
         plt.tight_layout()
         # refresh canvas
@@ -506,30 +422,40 @@ class MainWindow(QMainWindow):
 
         calc_str = self.ui.calc_text.toPlainText()
 
-        calc_str = calc_str.replace("A", "self.data_dict[\"A\"][1,:]")
-        calc_str = calc_str.replace("B", "self.data_dict[\"B\"][1,:]")
-        calc_str = calc_str.replace("C", "self.data_dict[\"C\"][1,:]")
-        calc_str = calc_str.replace("D", "self.data_dict[\"D\"][1,:]")
-        calc_str = calc_str.replace("E", "self.data_dict[\"E\"][1,:]")
-        calc_str = calc_str.replace("F", "self.data_dict[\"F\"][1,:]")
-        calc_str = calc_str.replace("G", "self.data_dict[\"G\"][1,:]")
-        calc_str = calc_str.replace("H", "self.data_dict[\"H\"][1,:]")
-        calc_str = calc_str.replace("I", "self.data_dict[\"I\"][1,:]")
-        calc_str = calc_str.replace("J", "self.data_dict[\"J\"][1,:]")
-        calc_str = calc_str.replace("K", "self.data_dict[\"K\"][1,:]")
-        calc_str = calc_str.replace("L", "self.data_dict[\"L\"][1,:]")
-        calc_str = calc_str.replace("M", "self.data_dict[\"M\"][1,:]")
-        calc_str = calc_str.replace("N", "self.data_dict[\"N\"][1,:]")
+        if not self.data_is_2D:
+            data_axis = '\"y\"'
+        else:
+            data_axis = '\"z\"'
+        calc_str = calc_str.replace("A", f"self.data_dict[\"A\"][{data_axis}]")
+        calc_str = calc_str.replace("B", f"self.data_dict[\"B\"][{data_axis}]")
+        calc_str = calc_str.replace("C", f"self.data_dict[\"C\"][{data_axis}]")
+        calc_str = calc_str.replace("D", f"self.data_dict[\"D\"][{data_axis}]")
+        calc_str = calc_str.replace("E", f"self.data_dict[\"E\"][{data_axis}]")
+        calc_str = calc_str.replace("F", f"self.data_dict[\"F\"][{data_axis}]")
+        calc_str = calc_str.replace("G", f"self.data_dict[\"G\"][{data_axis}]")
+        calc_str = calc_str.replace("H", f"self.data_dict[\"H\"][{data_axis}]")
+        calc_str = calc_str.replace("I", f"self.data_dict[\"I\"][{data_axis}]")
+        calc_str = calc_str.replace("J", f"self.data_dict[\"J\"][{data_axis}]")
+        calc_str = calc_str.replace("K", f"self.data_dict[\"K\"][{data_axis}]")
+        calc_str = calc_str.replace("L", f"self.data_dict[\"L\"][{data_axis}]")
+        calc_str = calc_str.replace("M", f"self.data_dict[\"M\"][{data_axis}]")
+        calc_str = calc_str.replace("N", f"self.data_dict[\"N\"][{data_axis}]")
 
-        calc_str = calc_str.replace("X", "self.data_dict[\"A\"][0,:]")
+        # reserved keyword for x axis
+        calc_str = calc_str.replace("X", "self.data_dict[\"A\"][\'x\']")
 
         calc_str = calc_str.split("\n")
         calc_str = [i for i in calc_str if i]
         for output_idx, calc in enumerate(calc_str):
             try:
-                output = eval(calc)
+                output = np.array(eval(calc))
                 output_name = f'output_{output_idx}'
-                self.data_dict[output_name] = np.array([self.data_dict["A"][0], output])
+                if self.data_is_2D:
+                    temp_dict = {'x': np.array(self.data_dict["A"]['x']), 'y': np.array(self.data_dict["A"]['y']),
+                                 'z': output}
+                else:
+                    temp_dict = {'x': np.array(self.data_dict["A"]['x']), 'y': output, 'z': None}
+                self.data_dict[output_name] = temp_dict
             except:
                 print(f'{calc} is invalid expression')
         self.plot()

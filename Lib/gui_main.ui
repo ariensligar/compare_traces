@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>959</width>
-    <height>501</height>
+    <width>963</width>
+    <height>508</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -486,7 +486,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>959</width>
+     <width>963</width>
      <height>22</height>
     </rect>
    </property>
@@ -518,6 +518,7 @@
      <string>Expression Library</string>
     </property>
     <addaction name="action_expression1"/>
+    <addaction name="action_expression2"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
@@ -578,6 +579,11 @@
   <action name="action_expression1">
    <property name="text">
     <string>10.0*np.log10(np.abs((np.fft.ifft(A+B*1j)))</string>
+   </property>
+  </action>
+  <action name="action_expression2">
+   <property name="text">
+    <string>A+B*1j</string>
    </property>
   </action>
  </widget>
