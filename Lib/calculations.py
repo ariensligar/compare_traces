@@ -305,7 +305,7 @@ class MainWindow(QMainWindow):
             data.append(first_col)
 
             for each in self.data_dict:
-                data.append(self.data_dict[each]['y'])
+                data.append(np.real(self.data_dict[each]['y']))
                 header.append(each)
             data = np.array(data)
 
