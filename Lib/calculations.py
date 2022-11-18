@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PySide6.QtWidgets import QMainWindow, QFileDialog
 import pathlib
 
@@ -5,11 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
 from pyaedt import Hfss
 from pyaedt import Desktop
 
-# from scipy import interpolate
+from scipy import interpolate
 from Lib.trace_select import Dialog
 from Lib.Populate_GUI import GUI_Values
 from Lib.gui_main import Ui_MainWindow
@@ -17,7 +17,7 @@ from Lib.gui_main import Ui_MainWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, pids):
-        root_dir = pathlib.Path(__file__).absolute().parent
+        root_dir = pathlib.Path(__file__).absolute().parent.parent
         self.base_path = str(root_dir.resolve())
         # sys.path.append(base_path + '/script_lib')
 
@@ -85,6 +85,11 @@ class MainWindow(QMainWindow):
         self.initGUI()
         self.data_dict = {}
         self.data_is_2D = False
+        self.global_x_axis = [0,1]
+        self.global_x_axis_len = 2
+        self.global_x_axis_start = 0
+        self.global_x_axis_stop = 1
+        self.global_x_axis_step = 1
 
         self.previous_proj_selection = None
         self.previous_design_selection = None
@@ -158,6 +163,11 @@ class MainWindow(QMainWindow):
             self.ui.action_expression2.blockSignals(False)
 
     def set_plot_options(self, option_num):
+        """
+
+        :param option_num:
+        :return:
+        """
         self.ui.actionOutput_on_Second_Y_Axis.blockSignals(True)
         self.ui.actionOnly_Show_Output.blockSignals(True)
         self.ui.actionOnly_Show_Input.blockSignals(True)
@@ -257,7 +267,8 @@ class MainWindow(QMainWindow):
             self.aedtapp = Hfss(project_name)
         print('project changed: ' + project_name)
 
-    def create_aedt_report(self, report_name="CompareTraces_Result"):
+    def create_aedt_report(self):
+        report_name = "CompareTraces_Result"
         temp_dir = self.aedtapp.temp_directory
         oModule = self.aedtapp.odesign.GetModule("ReportSetup")
         export_name = f"{temp_dir}temp_export.csv"
@@ -266,7 +277,7 @@ class MainWindow(QMainWindow):
 
         if export_success:
             report_names_before = oModule.GetChildNames()
-            oModule.CreateReportFromTemplate("template.rpt")
+            oModule.CreateReportFromTemplate(f"{self.base_path }/template.rpt")
             report_names_after = oModule.GetChildNames()
             resulting_report_name = self.diff(report_names_before, report_names_after)[0]
             oModule.ImportIntoReport(resulting_report_name, export_name)
@@ -351,19 +362,39 @@ class MainWindow(QMainWindow):
             self.data_dict[button_id] = data
             self.plot()
 
-    def check_data_xaxis(self):
-        length_list = []
-        for each in self.data_dict:
-            if each != "output":
-                data = self.data_dict[each]
-                length_list.append(len(data[0]))
-        if len(set(length_list))>1:
-            return # data sets are not the same number of samples
-        return
-    # def interpolate_data(self):
-    #     x = np.arange(0, 10)
-    #     y = np.exp(-x / 3.0)
-    #     f = interpolate.interp1d(x, y)
+    def check_data_xaxis(self, data):
+        """
+        This will check the data on the X axis of trace A against the X axis of all other traces. This does not check all
+        conditions. Right now it primarily is used to check and interpolate for the condition when the start and stop
+        of the frequency sweep is the same, but the step size is different. Other cases can be supported in the future.
+
+        :param data: dictionary with keys 'x' and 'y' for the data to be compared
+        :return: updated  if the check determines it can interpolate/fix the data. Otherwise it returns None
+        """
+
+        data_len = len(data['x'])
+        data_start = data['x'][0]
+        data_stop = data['x'][-1]
+        data_step = data['x'][1]-data['x'][0]
+
+        if self.global_x_axis_len == data_len and self.global_x_axis_start == data_start and self.global_x_axis_stop == data_stop and self.global_x_axis_step == data_step:
+            # everything is the same, don't do anything
+            return None
+        if self.global_x_axis_len == data_len:
+            # same number of points, but might have a different start, stop or step
+            # I am going to assume this is a mistake, and just not do anything, just issue a warning
+            print("WARNING:Data in \"A\" has the same number of points as other traces, but start/stop/step may not be equal")
+            print("Operating on data as though X axis in trace A is the basis for comparison, this might be incorrect")
+            return None
+
+        if self.global_x_axis_start == data_start and self.global_x_axis_stop == data_stop and self.global_x_axis_step != data_stop:
+            # this means it is just a different step size, interpolate using A step size
+            f = interpolate.interp1d(data['x'], data['y'])
+            data['y'] = f(self.global_x_axis)
+            data['x'] = self.global_x_axis
+            return data
+        else:
+            return None
 
     def plot(self):
 
@@ -386,18 +417,18 @@ class MainWindow(QMainWindow):
         # plot data
 
         for each in self.data_dict:
+            # plot input, when output doesn't exists and the only_ouput is not selected
             if "output" not in each and not only_output:
                 data = self.data_dict[each]
-                if data['z'] is None:
+                if data['z'] is None:  # is 2D data
                     ax.plot(data['x'], data['y'], label=each)
-                else:
-                    pass
-                    # ax.imshow(data['z'])
+                else:  # 3d data
+                    ax.imshow(data['z'], label=each)
             elif "output" in each and not only_input:
                 data = self.data_dict[each]
                 if data['z'] is None:
-                    if secondary_axis:
-                        if not has_been_created:
+                    if secondary_axis:  # if we want to plot results on secondary y axis
+                        if not has_been_created:  # if sedcondary axis has not been created, create it
                             ax2 = ax.twinx()
                         ax2.plot(data['x'], data['y'], label=each, color=np.random.rand(3))
                         ax2.set_ylabel('Output Data', color='k')
@@ -408,17 +439,13 @@ class MainWindow(QMainWindow):
                         ax.set_ylabel('Input/Output Data')
                         ax.legend()
                 else:
-                    ax.imshow(data['z'])
+                    ax.imshow(data['z'], label=each)
         ax.legend(loc='upper left')
         plt.tight_layout()
         # refresh canvas
         self.canvas.draw()
 
     def calculate(self):
-
-        # are_traces_same_length = self.check_data_xaxis()
-        # if not are_traces_same_length:
-        #     self.interpolate_data()
 
         calc_str = self.ui.calc_text.toPlainText()
 
@@ -443,6 +470,22 @@ class MainWindow(QMainWindow):
 
         # reserved keyword for x axis
         calc_str = calc_str.replace("X", "self.data_dict[\"A\"][\'x\']")
+
+        # check if data in other traces matches x-axis in trace A
+        # only supported for 1D traces
+        if not self.data_is_2D:
+            # trace A is always used as basis for comparison
+            self.global_x_axis = self.data_dict["A"]['x']
+            self.global_x_axis_start = self.global_x_axis[0]
+            self.global_x_axis_stop = self.global_x_axis[-1]
+            self.global_x_axis_step = self.global_x_axis[1]-self.global_x_axis[0]
+            for trace in self.data_dict:
+                # check each trace against A, in some cases the calculation may not even use A, in the future
+                # I should probably only check against traces in the expression, but this is good enough for now
+                if trace != 'output' and trace != 'A':  # don't check output or trace A
+                    out = self.check_data_xaxis(self.data_dict[trace])
+                    if out is not None:  # if the return is some data, then update it
+                        self.data_dict[trace] = out  # overwrite with new interpolated data
 
         calc_str = calc_str.split("\n")
         calc_str = [i for i in calc_str if i]

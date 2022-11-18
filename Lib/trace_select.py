@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from PySide6.QtWidgets import QDialog
 from Lib.gui_trace_select import Ui_Dialog
@@ -15,6 +16,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.gui_params = GUI_Values(aedtapp)
         self.aedtapp = aedtapp
         self.initGUI_trace_select()
+        self.data_is_complex = False
 
     def initGUI_trace_select(self):
         # populate initial values
@@ -75,8 +77,22 @@ class Dialog(QDialog, Ui_Dialog):
         # data = np.array(data)
 
 
-        data = np.loadtxt(export_name, comments='#', skiprows=1, delimiter=',')
+        try: # this fails for complex numbers, not sure why, will revist another day
+            data = np.loadtxt(export_name, comments='#', skiprows=1, delimiter=',')
 
+        except:
+
+            self.data_is_complex = True
+            temp = []
+            with open(export_name, newline='') as csvfile:
+                filereader = csv.reader(csvfile, delimiter=',', quotechar='|')
+                next(filereader)
+                for row in filereader:
+                    num_cols = len(row)
+                    row_num = [complex(x.replace(" ", "").replace("i", "j")) for x in row]
+                    temp.append(row_num)
+                data = np.array(temp,dtype='complex')
+        #np.loadtxt(export_name, comments='#', skiprows=1, delimiter=',', converters={1: foo})
         if 'GHz' in header[0]:
             scale = 1e9
         elif 'MHz' in header[0]:
@@ -103,14 +119,20 @@ class Dialog(QDialog, Ui_Dialog):
             y_data = np.array(list(set(data[:, 1])))
             data_out_x = x_data*scale
             data_out_y = y_data
-            data_out_z = np.array(data[:, column_idx])
+            if self.data_is_complex:
+                data_out_z = np.array(data[:, column_idx], dtype='complex')
+            else:
+                data_out_z = np.array(data[:, column_idx])
             data_out_z = data_out_z.reshape((len(data_out_y),len(data_out_x)))
             test = 1
             return {'x':data_out_x,'y':data_out_y,'z':data_out_z}
         else: # data is 1d
             #data_out = np.array([data[:, 0] * scale, data[:, column_idx]])
             data_out_x = np.array(data[:, 0] * scale)
-            data_out_y = np.array(data[:, column_idx])
+            if self.data_is_complex:
+                data_out_y = np.array(data[:, column_idx], dtype='complex')
+            else:
+                data_out_y = np.array(data[:, column_idx])
             data_out_z = None
             return {'x':data_out_x, 'y':data_out_y,'z': data_out_z}
 

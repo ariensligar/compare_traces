@@ -51,3 +51,4 @@ vtk>=9.2.2
 wincertstore>=0.2
 wslink>=1.9.1
 yarl>=1.8.1
+scipy>=1.9.3

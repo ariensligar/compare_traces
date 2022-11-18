@@ -88,6 +88,9 @@ The Compare Traces Wizard is a tool that can be used to extract data from an Ans
 
 Calculations can be performed on several traces simultaneously or individual traces. Populate the GUI by browsing for existing traces within reports. Once populated, the data for this trace will be assigned to the corresponding label (A, B, C...etc). These labels can then be used in the calculation window to simplify the input of expressions. For example, an expression could simply be entered as A+B in the calculation window, and the results would reflect whatever data was defined for the A and B traces.
 
+The reports need to be either Rectangular Data, Rectangular Contour, or Data Table types. For Data
+Table type, the trace quantity can be a complex quantity. When the input or output data is a complex quantity, only the real part of the data will be plotted. The output data can be separated into two different output plots, one for real and one for imaginary if you want to visualize the complex quantity.
+
 Entering calculations can use standard python syntax, or utilize the Numpy library (imported as np) for more complex calculations. For example, np.fft.fft(A) would take the FFT of the data stored in A.
 
 Multiple calculations can be done simply by creating a new line (hitting enter). Each line will be evaluated independently.
