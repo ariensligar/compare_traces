@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from PySide6.QtWidgets import QMainWindow, QFileDialog
 import pathlib
-
+import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -17,8 +18,13 @@ from Lib.gui_main import Ui_MainWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, pids):
-        root_dir = pathlib.Path(__file__).absolute().parent.parent
-        self.base_path = str(root_dir.resolve())
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            #print('running in a PyInstaller bundle')
+            self.base_path = os.path.abspath(os.path.dirname(__file__))
+        else:
+            #print('running in a normal Python process')
+            root_dir = pathlib.Path(__file__).absolute().parent.parent
+            self.base_path = str(root_dir.resolve())
         # sys.path.append(base_path + '/script_lib')
 
         super(MainWindow, self).__init__()
