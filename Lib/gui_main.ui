@@ -612,7 +612,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Y Axis is Time</string>
+    <string>X Axis is Time</string>
    </property>
   </action>
   <action name="actionX_Axis_Is_Distance">
@@ -620,7 +620,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Y Axis is Distance</string>
+    <string>X Axis is Distance</string>
    </property>
   </action>
   <action name="actionX_Axis_Is_Default">
@@ -631,7 +631,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Y Axis Is Default</string>
+    <string>X Axis Is Default</string>
    </property>
   </action>
   <action name="action_2way">
