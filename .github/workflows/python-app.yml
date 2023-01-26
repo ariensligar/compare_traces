@@ -11,7 +11,7 @@ defaults:
 
 env:
   python-version: "3.8"
-  pyinstaller-version: "5.6.2"
+  pyinstaller-version: "5.7.0"
   project-name: Compare_Traces
 
 jobs:

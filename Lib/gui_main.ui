@@ -456,7 +456,7 @@
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter an expression using the Python syntax. The input supports numpy operations. Multiple expressions can be entered as new lines within this window. For example, enter an expression on the top line, if you press enter and go down to the second line, a second expression can be entered. X is a reserved keyword that will use the X axis values of trace A.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Examples:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Using standard python math library: A+B, A*B, A/B+C, sqrt(A)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Using numpy library: &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;np.power(A,2), np.sqrt(np.power(A,2)+np.power(B,2)), np.abs(A)-B/A, np.fft.fft(A), np.linalg.norm(A)&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Create a complex number:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;A+B*1j&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -512,11 +512,18 @@
     <addaction name="actionOnly_Show_Output"/>
     <addaction name="actionOnly_Show_Input"/>
     <addaction name="separator"/>
+    <addaction name="actionX_Axis_Is_Default"/>
+    <addaction name="actionX_Axis_Is_Time"/>
+    <addaction name="actionX_Axis_Is_Distance"/>
+    <addaction name="separator"/>
+    <addaction name="action_2way"/>
+    <addaction name="action_1way"/>
    </widget>
    <widget class="QMenu" name="menuExpression_Library">
     <property name="title">
      <string>Expression Library</string>
     </property>
+    <addaction name="action_expression0"/>
     <addaction name="action_expression1"/>
     <addaction name="action_expression2"/>
    </widget>
@@ -529,6 +536,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>2022.1</string>
    </property>
@@ -538,6 +548,9 @@
     <bool>true</bool>
    </property>
    <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="text">
@@ -546,6 +559,9 @@
   </action>
   <action name="action2023_1">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="text">
@@ -576,14 +592,65 @@
     <string>Only Show Input</string>
    </property>
   </action>
-  <action name="action_expression1">
+  <action name="action_expression0">
    <property name="text">
     <string>10.0*np.log10(np.abs((np.fft.ifft(A+B*1j)))</string>
    </property>
   </action>
-  <action name="action_expression2">
+  <action name="action_expression1">
    <property name="text">
     <string>A+B*1j</string>
+   </property>
+  </action>
+  <action name="action_expression2">
+   <property name="text">
+    <string>Range Profile (Hann)</string>
+   </property>
+  </action>
+  <action name="actionX_Axis_Is_Time">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Y Axis is Time</string>
+   </property>
+  </action>
+  <action name="actionX_Axis_Is_Distance">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Y Axis is Distance</string>
+   </property>
+  </action>
+  <action name="actionX_Axis_Is_Default">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Y Axis Is Default</string>
+   </property>
+  </action>
+  <action name="action_2way">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2-Way for Time and Distance</string>
+   </property>
+  </action>
+  <action name="action_1way">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1-Way for Time and Distance</string>
    </property>
   </action>
  </widget>

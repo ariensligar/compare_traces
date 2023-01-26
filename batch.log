@@ -1,0 +1,132 @@
+ 
+Ansys Electronics Desktop Version 2023.1.0, Build: 2022-11-20 22:10:41
+Location: C:\Program Files\AnsysEM\v231\Win64\ansysedt.exe
+Non Graphical Mode: No Project??
+Starting Batch Run: 3:37:46 PM  Jan 25, 2023
+Running as user: ANSYS\asligar
+Temp directory: C:\Users\asligar\AppData\Local\Temp
+Project directory: C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Ansoft
+-- Message Window --
+      *Global - Messages
+        [info] GRPC server running on port: 55431. 
+        [info] pyaedt v0.6.44
+        [info] Python version 3.8.13 (default, Oct 19 2022, 22:38:03) [MSC v.1916 64 bit (AMD64)]
+        [error] local variable 'active_project' referenced before assignment
+        [error]   File "C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Scripting\github\compare_traces\Lib\calculations.py", line 89, in __init__
+        [error]     aedtapp = Hfss(active_project, active_design,specified_version=self.version, new_desktop_session=False)
+        [error] The action requested resulted in no work being done. Error-style clean-up has been performed.  
+-- Message Window --
+Stopping Batch Run: 3:38:01 PM  Jan 25, 2023
+ 
+Ansys Electronics Desktop Version 2023.1.0, Build: 2022-11-20 22:10:41
+Location: C:\Program Files\AnsysEM\v231\Win64\ansysedt.exe
+Non Graphical Mode: No Project??
+Starting Batch Run: 3:39:50 PM  Jan 25, 2023
+Running as user: ANSYS\asligar
+Temp directory: C:\Users\asligar\AppData\Local\Temp
+Project directory: C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Ansoft
+-- Message Window --
+      *Global - Messages
+        [info] GRPC server running on port: 56235. 
+        [info] pyaedt v0.6.44
+        [info] Python version 3.8.13 (default, Oct 19 2022, 22:38:03) [MSC v.1916 64 bit (AMD64)]
+        [error] local variable 'active_project' referenced before assignment
+        [error]   File "C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Scripting\github\compare_traces\Lib\calculations.py", line 89, in __init__
+        [error]     aedtapp = Hfss(active_project, active_design,specified_version=self.version, new_desktop_session=False)
+        [error] The action requested resulted in no work being done. Error-style clean-up has been performed.  
+-- Message Window --
+Stopping Batch Run: 3:40:01 PM  Jan 25, 2023
+ 
+Ansys Electronics Desktop Version 2023.1.0, Build: 2022-11-20 22:10:41
+Location: C:\Program Files\AnsysEM\v231\Win64\ansysedt.exe
+Non Graphical Mode: No Project??
+Starting Batch Run: 3:40:42 PM  Jan 25, 2023
+Running as user: ANSYS\asligar
+Temp directory: C:\Users\asligar\AppData\Local\Temp
+Project directory: C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Ansoft
+-- Message Window --
+      *Global - Messages
+        [info] GRPC server running on port: 51852. 
+-- Message Window --
+Stopping Batch Run: 3:40:52 PM  Jan 25, 2023
+ 
+Ansys Electronics Desktop Version 2023.1.0, Build: 2022-11-20 22:10:41
+Location: C:\Program Files\AnsysEM\v231\Win64\ansysedt.exe
+Non Graphical Mode: No Project??
+Starting Batch Run: 3:45:19 PM  Jan 25, 2023
+Running as user: ANSYS\asligar
+Temp directory: C:\Users\asligar\AppData\Local\Temp
+Project directory: C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Ansoft
+-- Message Window --
+      *Global - Messages
+        [info] GRPC server running on port: 56511. 
+        [info] pyaedt v0.6.44
+        [info] Python version 3.8.13 (default, Oct 19 2022, 22:38:03) [MSC v.1916 64 bit (AMD64)]
+        [error] local variable 'active_project' referenced before assignment
+        [error]   File "C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Scripting\github\compare_traces\Lib\calculations.py", line 89, in __init__
+        [error]     aedtapp = Hfss(active_project, active_design,specified_version=self.version, new_desktop_session=False)
+        [error] The action requested resulted in no work being done. Error-style clean-up has been performed.  
+-- Message Window --
+Stopping Batch Run: 3:47:37 PM  Jan 25, 2023
+ 
+Ansys Electronics Desktop Version 2023.1.0, Build: 2022-11-20 22:10:41
+Location: C:\Program Files\AnsysEM\v231\Win64\ansysedt.exe
+Non Graphical Mode: No Project??
+Starting Batch Run: 4:13:40 PM  Jan 25, 2023
+Running as user: ANSYS\asligar
+Temp directory: C:\Users\asligar\AppData\Local\Temp
+Project directory: C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Ansoft
+[warning] Electronics Desktop cannot be closed right now because it is being used by another application, script or extension wizard.
+
+[warning] Electronics Desktop cannot be closed right now because it is being used by another application, script or extension wizard.
+
+ 
+Ansys Electronics Desktop Version 2023.1.0, Build: 2022-11-20 22:10:41
+Location: C:\Program Files\AnsysEM\v231\Win64\ansysedt.exe
+Non Graphical Mode: No Project??
+Starting Batch Run: 4:43:41 PM  Jan 25, 2023
+Running as user: ANSYS\asligar
+Temp directory: C:\Users\asligar\AppData\Local\Temp
+Project directory: C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Ansoft
+-- Message Window --
+      *Global - Messages
+        [info] GRPC server running on port: 57238. 
+        [info] pyaedt v0.6.44
+        [info] Python version 3.8.13 (default, Oct 19 2022, 22:38:03) [MSC v.1916 64 bit (AMD64)]
+        [error] local variable 'active_project' referenced before assignment
+        [error]   File "C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Scripting\github\compare_traces\Lib\calculations.py", line 87, in __init__
+        [error]     aedtapp = Hfss(active_project, active_design, new_desktop_session=False,specified_version='2023.1')
+        [error] The action requested resulted in no work being done. Error-style clean-up has been performed.  
+-- Message Window --
+Stopping Batch Run: 4:48:01 PM  Jan 25, 2023
+ 
+Ansys Electronics Desktop Version 2023.1.0, Build: 2022-11-20 22:10:41
+Location: C:\Program Files\AnsysEM\v231\Win64\ansysedt.exe
+Non Graphical Mode: No Project??
+Starting Batch Run: 8:16:08 AM  Jan 26, 2023
+Running as user: ANSYS\asligar
+Temp directory: C:\Users\asligar\AppData\Local\Temp
+Project directory: C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Ansoft
+-- Message Window --
+      *Global - Messages
+        [info] GRPC server running on port: 51316. 
+        [info] pyaedt v0.6.44
+        [info] Python version 3.8.13 (default, Oct 19 2022, 22:38:03) [MSC v.1916 64 bit (AMD64)]
+        [error] local variable 'active_project' referenced before assignment
+        [error]   File "C:\Users\asligar\OneDrive - ANSYS, Inc\Documents\Scripting\github\compare_traces\Lib\calculations.py", line 87, in __init__
+        [error]     aedtapp = Hfss(active_project, active_design, new_desktop_session=False,specified_version='2023.1')
+        [error] The action requested resulted in no work being done. Error-style clean-up has been performed.  
+        [info] pyaedt v0.6.44
+        [info] Python version 3.8.13 (default, Oct 19 2022, 22:38:03) [MSC v.1916 64 bit (AMD64)]
+        [error] name 'active_project' is not defined
+        [error]   File "C:/Users/asligar/OneDrive - ANSYS, Inc/Documents/Scripting/github/compare_traces/test.py", line 24, in <module>
+        [error]     aedtapp = Hfss(active_project, active_design, new_desktop_session=False, specified_version='2023.1')
+        [error] The action requested resulted in no work being done. Error-style clean-up has been performed.  
+        [info] pyaedt v0.6.44
+        [info] Python version 3.8.13 (default, Oct 19 2022, 22:38:03) [MSC v.1916 64 bit (AMD64)]
+        [error] The action requested resulted in no work being done. Error-style clean-up has been performed.  
+        [error]   File "C:/Users/asligar/OneDrive - ANSYS, Inc/Documents/Scripting/github/compare_traces/test.py", line 24, in <module>
+        [error]     aedtapp = Hfss(active_project, active_design, new_desktop_session=False, specified_version='2023.1')
+        [error] The action requested resulted in no work being done. Error-style clean-up has been performed.  
+-- Message Window --
+Stopping Batch Run: 9:05:02 AM  Jan 26, 2023

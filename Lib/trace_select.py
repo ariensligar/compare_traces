@@ -4,14 +4,17 @@ from PySide6.QtWidgets import QDialog
 from Lib.gui_trace_select import Ui_Dialog
 from Lib.Populate_GUI import GUI_Values
 import numpy as np
-from pyaedt import Hfss
 import csv
+import pyaedt
+from pyaedt import Desktop
 
+pyaedt.settings.use_grpc_api = False  # otherwise it always opens a new session starting with 2023
 
 class Dialog(QDialog, Ui_Dialog):
     def __init__(self, aedtapp, parent=None):
         super(Dialog, self).__init__(parent)
         # QDialog.__init__(self, parent)
+        self.version = None
         self.setupUi(self)
         self.gui_params = GUI_Values(aedtapp)
         self.aedtapp = aedtapp
@@ -22,7 +25,13 @@ class Dialog(QDialog, Ui_Dialog):
         # populate initial values
         self.gui_params = GUI_Values(self.aedtapp)
         project_names = self.gui_params.get_project_names()
-
+        self.version = self.aedtapp.aedt_version_id
+        if self.version =='ANSYSEM_ROOT231':
+            self.version='2023.1'
+        elif self.version =='ANSYSEM_ROOT222':
+            self.version='2022.2'
+        elif self.version =='ANSYSEM_ROOT221':
+            self.version='2022.1'
         if self.aedtapp.project_name is not None:
             active_project = self.aedtapp.project_name
         else:
@@ -76,8 +85,7 @@ class Dialog(QDialog, Ui_Dialog):
         #     data.append(temp_data)
         # data = np.array(data)
 
-
-        try: # this fails for complex numbers, not sure why, will revist another day
+        try:  # this fails for complex numbers, not sure why, will revist another day
             data = np.loadtxt(export_name, comments='#', skiprows=1, delimiter=',')
 
         except:
@@ -91,8 +99,8 @@ class Dialog(QDialog, Ui_Dialog):
                     num_cols = len(row)
                     row_num = [complex(x.replace(" ", "").replace("i", "j")) for x in row]
                     temp.append(row_num)
-                data = np.array(temp,dtype='complex')
-        #np.loadtxt(export_name, comments='#', skiprows=1, delimiter=',', converters={1: foo})
+                data = np.array(temp, dtype='complex')
+        # np.loadtxt(export_name, comments='#', skiprows=1, delimiter=',', converters={1: foo})
         if 'GHz' in header[0]:
             scale = 1e9
         elif 'MHz' in header[0]:
@@ -113,34 +121,39 @@ class Dialog(QDialog, Ui_Dialog):
         # data in the format [m][n][data]
         # if data is id we only return [m][data]
         data_is_2d = False
-        if len(set(list(data[:, 0]))) != len(list(data[:, 0])): #first column will loop, second column will increase with each loop
+        if len(set(list(data[:, 0]))) != len(
+                list(data[:, 0])):  # first column will loop, second column will increase with each loop
             data_is_2d = True
             x_data = np.array(list(set(data[:, 0])))
             y_data = np.array(list(set(data[:, 1])))
-            data_out_x = x_data*scale
+            data_out_x = x_data * scale
             data_out_y = y_data
             if self.data_is_complex:
                 data_out_z = np.array(data[:, column_idx], dtype='complex')
             else:
                 data_out_z = np.array(data[:, column_idx])
-            data_out_z = data_out_z.reshape((len(data_out_y),len(data_out_x)))
+            data_out_z = data_out_z.reshape((len(data_out_y), len(data_out_x)))
             test = 1
-            return {'x':data_out_x,'y':data_out_y,'z':data_out_z}
-        else: # data is 1d
-            #data_out = np.array([data[:, 0] * scale, data[:, column_idx]])
+            return {'x': np.real(data_out_x), 'y': np.real(data_out_y), 'z': data_out_z}
+        else:  # data is 1d
+            # data_out = np.array([data[:, 0] * scale, data[:, column_idx]])
             data_out_x = np.array(data[:, 0] * scale)
             if self.data_is_complex:
                 data_out_y = np.array(data[:, column_idx], dtype='complex')
             else:
                 data_out_y = np.array(data[:, column_idx])
             data_out_z = None
-            return {'x':data_out_x, 'y':data_out_y,'z': data_out_z}
+            return {'x': np.real(data_out_x), 'y': data_out_y, 'z': data_out_z}
 
     def activate_project(self, project_name, design_name=None):
         if design_name is not None:
-            self.aedtapp = Hfss(project_name, design_name)
+            # self.aedtapp = Hfss(project_name, design_name, new_desktop_session=False,specified_version='2023.1')
+            with Desktop(new_desktop_session=False, close_on_exit=False, specified_version=self.version) as d:
+                self.aedtapp = d[project_name, design_name]
         else:
-            self.aedtapp = Hfss(project_name)
+            # self.aedtapp = Hfss(project_name, new_desktop_session=False,specified_version='2023.1')
+            with Desktop(new_desktop_session=False, close_on_exit=False, specified_version=self.version) as d:
+                self.aedtapp = d[project_name]
         print('project changed: ' + project_name)
         self.gui_params = GUI_Values(self.aedtapp)
 
@@ -177,4 +190,3 @@ class Dialog(QDialog, Ui_Dialog):
         self.trace_name_input.clear()
         self.trace_name_input.addItems(all_traces)
         self.trace_name_input.blockSignals(False)
-

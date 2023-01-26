@@ -5,24 +5,29 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import pyaedt
+import scipy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from pyaedt import Hfss
 from pyaedt import Desktop
 
-from scipy import interpolate
 from Lib.trace_select import Dialog
 from Lib.Populate_GUI import GUI_Values
 from Lib.gui_main import Ui_MainWindow
+
+pyaedt.settings.use_grpc_api = False  # otherwise it always opens a new session starting with 2023
 
 
 class MainWindow(QMainWindow):
     def __init__(self, pids):
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            #print('running in a PyInstaller bundle')
-            self.base_path = os.path.abspath(os.path.dirname(__file__))
+            print('running in a PyInstaller bundle')
+            self.base_path = os.path.abspath(os.path.dirname('__file__'))
+            # print(os.path.abspath(os.path.dirname(__file__)))
+            print(self.base_path)
         else:
-            #print('running in a normal Python process')
+            # print('running in a normal Python process')
             root_dir = pathlib.Path(__file__).absolute().parent.parent
             self.base_path = str(root_dir.resolve())
         # sys.path.append(base_path + '/script_lib')
@@ -55,8 +60,16 @@ class MainWindow(QMainWindow):
         self.ui.actionOnly_Show_Output.changed.connect(lambda: self.set_plot_options(1))
         self.ui.actionOnly_Show_Input.changed.connect(lambda: self.set_plot_options(2))
 
-        self.ui.action_expression1.triggered.connect(lambda: self.set_expression(0))
-        self.ui.action_expression2.triggered.connect(lambda: self.set_expression(1))
+        self.ui.actionX_Axis_Is_Default.changed.connect(lambda: self.set_plot_options(3))
+        self.ui.actionX_Axis_Is_Distance.changed.connect(lambda: self.set_plot_options(4))
+        self.ui.actionX_Axis_Is_Time.changed.connect(lambda: self.set_plot_options(5))
+
+        self.ui.action_1way.changed.connect(lambda: self.set_plot_options(6))
+        self.ui.action_2way.changed.connect(lambda: self.set_plot_options(7))
+
+        self.ui.action_expression0.triggered.connect(lambda: self.set_expression(0))
+        self.ui.action_expression1.triggered.connect(lambda: self.set_expression(1))
+        self.ui.action_expression2.triggered.connect(lambda: self.set_expression(2))
 
         self.plot_options = {'secondary_axis': False, 'only_output': False, 'only_input': False}
         self.version = '2022.2'  # default state
@@ -64,34 +77,36 @@ class MainWindow(QMainWindow):
         # self.ui.version_check_changed.clicked.connect(self.show_more)
 
         self.pids = pids
-        with Desktop(specified_version=self.version, new_desktop_session=False, close_on_exit=False) as d:
-            project_list = d.project_list()
-            if len(project_list) < 1:
-                print('No Projects Exists, please open a project, exiting')
+        with Desktop(new_desktop_session=False, close_on_exit=False) as d:
+            aedtapp = d[0, 0]
+            version = d.aedt_version_id
+            self.ui.action2022_1.blockSignals(True)
+            self.ui.action2022_2.blockSignals(True)
+            self.ui.action2023_1.blockSignals(True)
+            if version == '2022.2':
+                self.ui.action2022_1.setChecked(False)
+                self.ui.action2022_2.setChecked(True)
+                self.ui.action2023_1.setChecked(False)
+            elif version == '2022.1':
+                self.ui.action2022_1.setChecked(True)
+                self.ui.action2022_2.setChecked(False)
+                self.ui.action2023_1.setChecked(False)
             else:
-                design_list = d.design_list(project_list[0])
-                if len(design_list) < 1:
-                    n = 1
-                    while len(design_list) < 1 and n < (len(project_list)):
-                        active_project = project_list[n]
-                        design_list = d.design_list(active_project)
-                        n += 1
-                    if len(design_list) < 1:
-                        print('No Designs Exists in Open Projects, exiting')
-                    else:
-                        active_design = design_list[0]
-                else:
-                    active_project = project_list[0]
-                    active_design = design_list[0]
+                self.ui.action2022_1.setChecked(False)
+                self.ui.action2022_2.setChecked(False)
+                self.ui.action2023_1.setChecked(True)
 
-            aedtapp = Hfss(active_project, active_design, aedt_process_id=pids[0])
+            self.ui.action2022_1.blockSignals(False)
+            self.ui.action2022_2.blockSignals(False)
+            self.ui.action2023_1.blockSignals(False)
+            self.version = version
 
         self.gui_params = GUI_Values(aedtapp)
         self.aedtapp = aedtapp
         self.initGUI()
         self.data_dict = {}
         self.data_is_2D = False
-        self.global_x_axis = [0,1]
+        self.global_x_axis = [0, 1]
         self.global_x_axis_len = 2
         self.global_x_axis_start = 0
         self.global_x_axis_stop = 1
@@ -158,14 +173,20 @@ class MainWindow(QMainWindow):
     def set_expression(self, expression_num):
 
         if expression_num == 0:
-            self.ui.action_expression1.blockSignals(True)
+            self.ui.action_expression0.blockSignals(True)
             self.ui.calc_text.clear()
             self.ui.calc_text.setPlainText('10.0*np.log10(np.abs((np.fft.ifft(A+B*1j))))')
-            self.ui.action_expression1.blockSignals(False)
+            self.ui.action_expression0.blockSignals(False)
         elif expression_num == 1:
-            self.ui.action_expression2.blockSignals(True)
+            self.ui.action_expression1.blockSignals(True)
             self.ui.calc_text.clear()
             self.ui.calc_text.setPlainText('(A+B*1j)')
+            self.ui.action_expression1.blockSignals(False)
+        elif expression_num == 2:
+            self.ui.action_expression2.blockSignals(True)
+            self.ui.calc_text.clear()
+            self.ui.calc_text.setPlainText(
+                '10.0*np.log10(np.abs(512/len(A)*np.fft.ifft(np.multiply(A,np.hanning(len(A))*len(A)/np.sum(np.hanning(len(A)))),n=512)))')
             self.ui.action_expression2.blockSignals(False)
 
     def set_plot_options(self, option_num):
@@ -177,6 +198,13 @@ class MainWindow(QMainWindow):
         self.ui.actionOutput_on_Second_Y_Axis.blockSignals(True)
         self.ui.actionOnly_Show_Output.blockSignals(True)
         self.ui.actionOnly_Show_Input.blockSignals(True)
+
+        self.ui.actionX_Axis_Is_Default.blockSignals(True)
+        self.ui.actionX_Axis_Is_Distance.blockSignals(True)
+        self.ui.actionX_Axis_Is_Time.blockSignals(True)
+
+        self.ui.action_1way.blockSignals(True)
+        self.ui.action_2way.blockSignals(True)
 
         if option_num == 0:
             self.plot_options = {'secondary_axis': True, 'only_output': False, 'only_input': False}
@@ -193,10 +221,44 @@ class MainWindow(QMainWindow):
             self.ui.actionOutput_on_Second_Y_Axis.setChecked(self.plot_options['secondary_axis'])
             self.ui.actionOnly_Show_Output.setChecked(self.plot_options['only_output'])
             self.ui.actionOnly_Show_Input.setChecked(self.plot_options['only_input'])
+        elif option_num == 3:
+            self.plot_options = {'secondary_axis': False, 'only_output': False, 'only_input': True,
+                                 'xaxis_default': True, 'xaxis_dist': False, 'xaxis_time': False}
+
+            self.ui.actionX_Axis_Is_Default.setChecked(self.plot_options['xaxis_default'])
+            self.ui.actionX_Axis_Is_Distance.setChecked(self.plot_options['xaxis_dist'])
+            self.ui.actionX_Axis_Is_Time.setChecked(self.plot_options['xaxis_time'])
+        elif option_num == 4:
+            self.plot_options = {'secondary_axis': False, 'only_output': True, 'only_input': False,
+                                 'xaxis_default': False, 'xaxis_dist': True, 'xaxis_time': False}
+
+            self.ui.actionX_Axis_Is_Default.setChecked(self.plot_options['xaxis_default'])
+            self.ui.actionX_Axis_Is_Distance.setChecked(self.plot_options['xaxis_dist'])
+            self.ui.actionX_Axis_Is_Time.setChecked(self.plot_options['xaxis_time'])
+        elif option_num == 5:
+            self.plot_options = {'secondary_axis': False, 'only_output': True, 'only_input': False,
+                                 'xaxis_default': False, 'xaxis_dist': False, 'xaxis_time': True}
+
+
+            self.ui.actionX_Axis_Is_Default.setChecked(self.plot_options['xaxis_default'])
+            self.ui.actionX_Axis_Is_Distance.setChecked(self.plot_options['xaxis_dist'])
+            self.ui.actionX_Axis_Is_Time.setChecked(self.plot_options['xaxis_time'])
+        elif option_num == 6:
+            self.ui.action_1way.setChecked(True)
+            self.ui.action_2way.setChecked(False)
+        elif option_num == 7:
+            self.ui.action_1way.setChecked(False)
+            self.ui.action_2way.setChecked(True)
+
 
         self.ui.actionOutput_on_Second_Y_Axis.blockSignals(False)
         self.ui.actionOnly_Show_Output.blockSignals(False)
         self.ui.actionOnly_Show_Input.blockSignals(False)
+        self.ui.actionX_Axis_Is_Default.blockSignals(False)
+        self.ui.actionX_Axis_Is_Distance.blockSignals(False)
+        self.ui.actionX_Axis_Is_Time.blockSignals(False)
+        self.ui.action_1way.blockSignals(False)
+        self.ui.action_2way.blockSignals(False)
 
     def version_check_changed(self, version):
 
@@ -225,27 +287,9 @@ class MainWindow(QMainWindow):
         self.ui.statusBar.showMessage(f'Using AEDT version: {self.version}')
 
     def change_desktop_versions(self):
-        with Desktop(specified_version=self.version, new_desktop_session=False, close_on_exit=False) as d:
-            project_list = d.project_list()
-            if len(project_list) < 1:
-                print('No Projects Exists, please open a project, exiting')
-            else:
-                design_list = d.design_list(project_list[0])
-                if len(design_list) < 1:
-                    n = 1
-                    while len(design_list) < 1 and n < (len(project_list)):
-                        active_project = project_list[n]
-                        design_list = d.design_list(active_project)
-                        n += 1
-                    if len(design_list) < 1:
-                        print('No Designs Exists in Open Projects, exiting')
-                    else:
-                        active_design = design_list[0]
-                else:
-                    active_project = project_list[0]
-                    active_design = design_list[0]
-
-            aedtapp = Hfss(active_project, active_design, specified_version=self.version)
+        with Desktop(new_desktop_session=False, close_on_exit=False, specified_version=self.version) as d:
+            aedtapp = d[0, 0]
+            self.version = d.aedt_version_id
 
         self.gui_params = GUI_Values(aedtapp)
         self.aedtapp = aedtapp
@@ -283,7 +327,7 @@ class MainWindow(QMainWindow):
 
         if export_success:
             report_names_before = oModule.GetChildNames()
-            oModule.CreateReportFromTemplate(f"{self.base_path }/template.rpt")
+            oModule.CreateReportFromTemplate(f"{self.base_path}/template.rpt")
             report_names_after = oModule.GetChildNames()
             resulting_report_name = self.diff(report_names_before, report_names_after)[0]
             oModule.ImportIntoReport(resulting_report_name, export_name)
@@ -303,14 +347,17 @@ class MainWindow(QMainWindow):
     def save_csv(self, fname):
         num_datasets = len(self.data_dict.keys())
         dataset_names = list(self.data_dict.keys())
+        only_show_outputs = self.ui.actionOnly_Show_Output.isChecked()
+
+        if only_show_outputs: # if we only show output, this is teh case when x axis might not match, so lets just mremove them
+            dataset_names[:] = [x for x in dataset_names if 'output' in x]
         if num_datasets > 0:
-            np.array(num_datasets)
             header = ['X Axis']
             data = []
             first_col = self.data_dict[dataset_names[0]]['x']
             data.append(first_col)
 
-            for each in self.data_dict:
+            for each in dataset_names:
                 data.append(np.real(self.data_dict[each]['y']))
                 header.append(each)
             data = np.array(data)
@@ -381,7 +428,7 @@ class MainWindow(QMainWindow):
         data_len = len(data['x'])
         data_start = data['x'][0]
         data_stop = data['x'][-1]
-        data_step = data['x'][1]-data['x'][0]
+        data_step = data['x'][1] - data['x'][0]
 
         if self.global_x_axis_len == data_len and self.global_x_axis_start == data_start and self.global_x_axis_stop == data_stop and self.global_x_axis_step == data_step:
             # everything is the same, don't do anything
@@ -389,28 +436,38 @@ class MainWindow(QMainWindow):
         if self.global_x_axis_len == data_len:
             # same number of points, but might have a different start, stop or step
             # I am going to assume this is a mistake, and just not do anything, just issue a warning
-            print("WARNING:Data in \"A\" has the same number of points as other traces, but start/stop/step may not be equal")
+            print(
+                "WARNING:Data in \"A\" has the same number of points as other traces, but start/stop/step may not be equal")
             print("Operating on data as though X axis in trace A is the basis for comparison, this might be incorrect")
             return None
 
-        if self.global_x_axis_start == data_start and self.global_x_axis_stop == data_stop and self.global_x_axis_step != data_stop:
+
+        if self.global_x_axis_step != data_step:
             # this means it is just a different step size, interpolate using A step size
-            f = interpolate.interp1d(data['x'], data['y'])
+            f = scipy.interpolate.interp1d(data['x'], data['y'])
             data['y'] = f(self.global_x_axis)
             data['x'] = self.global_x_axis
             return data
         else:
             return None
 
-    def plot(self):
+    def plot(self,from_calculate=False):
 
         self.ui.actionOutput_on_Second_Y_Axis.changed.connect(lambda: self.set_plot_options(0))
         self.ui.actionOnly_Show_Output.changed.connect(lambda: self.set_plot_options(1))
         self.ui.actionOnly_Show_Input.changed.connect(lambda: self.set_plot_options(2))
 
-        secondary_axis = self.ui.actionOutput_on_Second_Y_Axis.isChecked()
-        only_output = self.ui.actionOnly_Show_Output.isChecked()
-        only_input = self.ui.actionOnly_Show_Input.isChecked()
+        if not self.ui.actionX_Axis_Is_Default.isChecked() and from_calculate:
+            self.ui.actionOutput_on_Second_Y_Axis.setChecked(False)
+            secondary_axis = False
+            self.ui.actionOnly_Show_Output.setChecked(True)
+            only_output = True
+            self.ui.actionOnly_Show_Input.setChecked(False)
+            only_input = False
+        else:
+            secondary_axis = self.ui.actionOutput_on_Second_Y_Axis.isChecked()
+            only_output = self.ui.actionOnly_Show_Output.isChecked()
+            only_input = self.ui.actionOnly_Show_Input.isChecked()
 
         if secondary_axis:
             has_been_created = False
@@ -436,12 +493,12 @@ class MainWindow(QMainWindow):
                     if secondary_axis:  # if we want to plot results on secondary y axis
                         if not has_been_created:  # if sedcondary axis has not been created, create it
                             ax2 = ax.twinx()
-                        ax2.plot(data['x'], data['y'], label=each, color=np.random.rand(3))
+                        ax2.plot(np.real(data['x']), np.real(data['y']), label=each, color=np.random.rand(3))
                         ax2.set_ylabel('Output Data', color='k')
                         ax2.legend(loc='lower right')
                         has_been_created = True
                     else:
-                        ax.plot(data['x'], data['y'], label=each)
+                        ax.plot(np.real(data['x']), np.real(data['y']), label=each)
                         ax.set_ylabel('Input/Output Data')
                         ax.legend()
                 else:
@@ -480,11 +537,41 @@ class MainWindow(QMainWindow):
         # check if data in other traces matches x-axis in trace A
         # only supported for 1D traces
         if not self.data_is_2D:
+            if self.ui.actionX_Axis_Is_Default.isChecked():
+                self.global_x_axis = self.data_dict["A"]['x']
+            elif self.ui.actionX_Axis_Is_Distance.isChecked():
+                freq_domain = np.real(self.data_dict["A"]['x'])
+                bw = freq_domain[-1]-freq_domain[0]
+                f_step = freq_domain[1]-freq_domain[0]
+                if self.ui.action_1way.isChecked():
+                    range_resolution = 3e8/1/bw
+                    range_max = range_resolution*len(freq_domain)
+                    self.global_x_axis=np.linspace(0,range_max,num=len(self.data_dict["A"]['y']))
+                elif self.ui.action_2way.isChecked():
+                    range_resolution = 3e8/2/bw
+                    range_max = range_resolution*len(freq_domain)
+                    self.global_x_axis=np.linspace(0,range_max,num=len(self.data_dict["A"]['y']))
+            elif self.ui.actionX_Axis_Is_Time.isChecked():
+                freq_domain = np.real(self.data_dict["A"]['x'])
+                bw = freq_domain[-1]-freq_domain[0]
+                f_step = freq_domain[1]-freq_domain[0]
+                if self.ui.action_1way.isChecked():
+                    range_resolution = 3e8/1/bw
+                    range_max = range_resolution*len(freq_domain)
+                    time_max = range_max/3e8
+                    self.global_x_axis=np.linspace(0,time_max,num=len(self.data_dict["A"]['y']))
+                elif self.ui.action_2way.isChecked():
+                    range_resolution = 3e8/2/bw
+                    range_max = range_resolution*len(freq_domain)
+                    time_max = range_max / 3e8
+                    self.global_x_axis = np.linspace(0,time_max,num=len(self.data_dict["A"]['y']))
+
             # trace A is always used as basis for comparison
-            self.global_x_axis = self.data_dict["A"]['x']
+
             self.global_x_axis_start = self.global_x_axis[0]
             self.global_x_axis_stop = self.global_x_axis[-1]
-            self.global_x_axis_step = self.global_x_axis[1]-self.global_x_axis[0]
+            self.global_x_axis_step = self.global_x_axis[1] - self.global_x_axis[0]
+            self.global_x_axis_len = len(self.global_x_axis)
             for trace in self.data_dict:
                 # check each trace against A, in some cases the calculation may not even use A, in the future
                 # I should probably only check against traces in the expression, but this is good enough for now
@@ -493,18 +580,26 @@ class MainWindow(QMainWindow):
                     if out is not None:  # if the return is some data, then update it
                         self.data_dict[trace] = out  # overwrite with new interpolated data
 
+
+
         calc_str = calc_str.split("\n")
         calc_str = [i for i in calc_str if i]
         for output_idx, calc in enumerate(calc_str):
             try:
                 output = np.array(eval(calc))
                 output_name = f'output_{output_idx}'
+
                 if self.data_is_2D:
-                    temp_dict = {'x': np.array(self.data_dict["A"]['x']), 'y': np.array(self.data_dict["A"]['y']),
-                                 'z': output}
+                    temp_dict = {"x": np.array(self.data_dict["A"]["x"]), "y": np.array(self.data_dict["A"]["y"]),
+                                 "z": output}
                 else:
-                    temp_dict = {'x': np.array(self.data_dict["A"]['x']), 'y': output, 'z': None}
+                    if len(output) != len(np.array(self.data_dict["A"]["x"])):
+                        self.global_x_axis = np.linspace(self.global_x_axis_start, self.global_x_axis_stop, num=len(output))
+                    else:
+                        self.global_x_axis = np.array(self.data_dict["A"]["x"])
+                    temp_dict = {"x": self.global_x_axis, "y": output, "z": None}
+
                 self.data_dict[output_name] = temp_dict
             except:
                 print(f'{calc} is invalid expression')
-        self.plot()
+        self.plot(from_calculate=True)
