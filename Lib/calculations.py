@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
                              self.ui.trace_browse_I, self.ui.trace_browse_J, self.ui.trace_browse_K,
                              self.ui.trace_browse_L,
                              self.ui.trace_browse_M, self.ui.trace_browse_N]
-        self.input_text = [self.ui.trace_text_A, self.ui.trace_text_B, self.ui.trace_text_B, self.ui.trace_text_D,
+        self.input_text = [self.ui.trace_text_A, self.ui.trace_text_B, self.ui.trace_text_C, self.ui.trace_text_D,
                            self.ui.trace_text_E, self.ui.trace_text_F, self.ui.trace_text_G, self.ui.trace_text_H,
                            self.ui.trace_text_I, self.ui.trace_text_J, self.ui.trace_text_K, self.ui.trace_text_L,
                            self.ui.trace_text_M, self.ui.trace_text_N]
@@ -477,6 +477,7 @@ class MainWindow(QMainWindow):
         ax = self.figure.add_subplot(111)
         ax.set_xlabel('X data')
         ax.set_ylabel('Input Data', color='g')
+
         # plot data
 
         for each in self.data_dict:
@@ -505,6 +506,8 @@ class MainWindow(QMainWindow):
                     ax.imshow(data['z'], label=each)
         ax.legend(loc='upper left')
         plt.tight_layout()
+        plt.title("Data")
+        plt.subplots_adjust(top=0.9)
         # refresh canvas
         self.canvas.draw()
 
